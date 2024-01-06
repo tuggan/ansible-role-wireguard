@@ -1,0 +1,66 @@
+[Interface]
+# {{ inventory_hostname }}
+Address = {{wireguard_address}}
+PrivateKey = {{wireguard_private_key}}
+{% if wireguard_listen_port is defined %}
+ListenPort = {{wireguard_listen_port}}
+{% elif wireguard_port is defined %}
+ListenPort = {{wireguard_port}}
+{% endif %}
+{% if wireguard_dns is defined %}
+DNS = {{wireguard_dns}}
+{% endif %}
+{% if wireguard_fwmark is defined %}
+FwMark = {{wireguard_fwmark}}
+{% endif %}
+{% if wireguard_mtu is defined %}
+MTU = {{wireguard_mtu}}
+{% endif %}
+{% if wireguard_table is defined %}
+Table = {{wireguard_table}}
+{% endif %}
+{% if wireguard_preup is defined %}
+{% for wg_preup in wireguard_preup %}
+PreUp = {{ wg_preup }}
+{% endfor %}
+{% endif %}
+{% if wireguard_predown is defined %}
+{% for wg_predown in wireguard_predown %}
+PreDown = {{ wg_predown }}
+{% endfor %}
+{% endif %}
+{% if wireguard_postup is defined %}
+{% for wg_postup in wireguard_postup %}
+PostUp = {{ wg_postup }}
+{% endfor %}
+{% endif %}
+{% if wireguard_postdown is defined %}
+{% for wg_postdown in wireguard_postdown %}
+PostDown = {{ wg_postdown }}
+{% endfor %}
+{% endif %}
+{% if wireguard_save_config is defined %}
+SaveConfig = true
+{% endif %}
+
+{% for item in wireguard_endpoints %}
+{% if item is mapping %}
+{% set endpoint = item %}
+# {{ endpoint.name }}
+{% else %}
+{% set endpoint = hostvars[item] %}
+# {{ endpoint.inventory_hostname }}
+{% endif %}
+{% if endpoint.wireguard_public_key != wireguard_public_key %}
+[Peer]
+PublicKey = {{ endpoint.wireguard_public_key }}
+AllowedIPs = {{ endpoint.wireguard_address.split('/')[0] }}/32
+{% if endpoint.wireguard_endpoint is defined %}
+Endpoint = {{ endpoint.wireguard_endpoint }}
+{% endif %}
+{% if endpoint.persistentkeepalive is defined %}
+PersistentKeepalive = 25
+{% endif %}
+{% endif %}
+
+{% endfor %}

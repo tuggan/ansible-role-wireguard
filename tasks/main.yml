@@ -1,0 +1,79 @@
+---
+
+- name: Install wireguard prerequisites
+  ansible.builtin.package:
+    pkg:
+      - resolvconf
+      - wireguard-tools
+
+- name: Make sure wireguard directory exists
+  ansible.builtin.file:
+    path: "{{ wireguard_conf_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0700
+
+- name: Check if wireguard private key exists
+  ansible.builtin.stat:
+    path: "{{ wireguard_conf_dir }}/{{ wireguard_interface }}.conf"
+  register: wireguard_register_conf_file
+
+- name: New private key
+  when:
+    - not wireguard_register_conf_file.stat.exists
+  block:
+    - name: Generate private key
+      ansible.builtin.command: "wg genkey"
+      register: wireguard_register_private_key
+      changed_when: false
+      no_log: "{{ ansible_verbosity < 3 }}"
+    
+    - name: Set private key fact
+      ansible.builtin.set_fact:
+        wireguard_private_key: "{{ wireguard_register_private_key.stdout }}"
+      no_log: "{{ ansible_verbosity < 3 }}"
+
+- name: Existing private key
+  when:
+    - wireguard_register_conf_file.stat.exists
+  block:
+    - name: Read wireguard config
+      ansible.builtin.slurp:
+        src: "{{ wireguard_conf_dir }}/{{ wireguard_interface }}.conf"
+      register: wireguard_register_config
+      no_log: "{{ ansible_verbosity < 3 }}"
+
+    - name: Set private key fact
+      ansible.builtin.set_fact:
+        wireguard_private_key: "{{ wireguard_register_config['content'] | b64decode | regex_findall('PrivateKey = (.*)') | first }}"
+      no_log: "{{ ansible_verbosity < 3 }}"
+
+- name: Derive public key
+  ansible.builtin.command: "wg pubkey"
+  args:
+    stdin: "{{ wireguard_private_key }}"
+  register: wireguard_register_public_key
+  changed_when: false
+  check_mode: false
+  no_log: "{{ ansible_verbosity < 3 }}"
+
+- name: Set public key fact
+  ansible.builtin.set_fact:
+    wireguard_public_key: "{{ wireguard_register_public_key.stdout }}"
+
+- name: Generate WireGuard configuration file
+  ansible.builtin.template:
+    src: "wg-quick.conf.j2"
+    dest: "{{ wireguard_conf_dir }}/{{ wireguard_interface }}.conf"
+    owner: root
+    group: root
+    mode: 0700
+  notify:
+    - Restart wg-quick
+
+- name: Start and enable wireguard service
+  ansible.builtin.service:
+    name: wg-quick@{{ wireguard_interface }}
+    state: "{{ wireguard_state }}"
+    enabled: "{{ wireguard_enabled }}"

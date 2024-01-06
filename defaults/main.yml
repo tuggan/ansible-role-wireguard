@@ -1,0 +1,9 @@
+---
+
+wireguard_interface: wg0
+wireguard_conf_dir: /etc/wireguard
+wireguard_template: wg-quick.conf.j2
+wireguard_port: 51820
+
+wireguard_enabled: true
+wireguard_state: started
