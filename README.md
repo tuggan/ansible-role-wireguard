@@ -49,7 +49,7 @@ Example Playbook
         - group-one
         - group-two
       roles:
-        - wireguard
+        - tuggan.wireguard
       tags:
         - wireguard
       become: true
