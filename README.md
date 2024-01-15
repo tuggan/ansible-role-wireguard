@@ -11,30 +11,17 @@ None.
 Role Variables
 --------------
 
-### wireguard_conf_dir
+There are a lot of configuration variables that can be set to configure a client. This is only a list of the common options. To find all variables see the templates.
 
-The directory where wireguard stores the configurations
+| Variable            | Required | Description                                         |
+| ------------------- | -------- | --------------------------------------------------- |
+| wireguard_conf_dir  | No       | The wireguard config directory                      |
+| wireguard_interface | No       | Name of the wireguard interface                     |
+| wireguard_template  | No       | Template to use for interface config                |
+| wireguard_port      | No       | Wireguard listening port                            |
+| wireguand_enabled   | No       | Specifies if wg-quick@interface should be enabled   |
+| wireguard_state     | No       | Specifies the state of a wg-quick@interface service |
 
-
-### wireguard_interface
-
-Wireguard interface name.
-
-### wireguard_template
-
-Template to use when applying the interface config.
-
-### wireguard_port
-
-The wireguard listening port
-
-### wireguard_enabled
-
-If wireguard should be enabled by systemd (wg-quick)
-
-### wireguard_state
-
-What state the service should have. (wg-quick)
 
 Dependencies
 ------------
