@@ -1,6 +1,8 @@
 galaxy_info:
   author: Dennis Vesterlund
   description: Installs and configures wireguard
+  role_name: wireguard
+  namespace: tuggan
 
   license: BSD-3-Clause
 
@@ -11,4 +13,3 @@ galaxy_info:
     - vpn
 
 dependencies: []
-

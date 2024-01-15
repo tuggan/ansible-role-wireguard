@@ -12,7 +12,7 @@
     state: directory
     owner: root
     group: root
-    mode: 0700
+    mode: "0o700"
 
 - name: Check if wireguard private key exists
   ansible.builtin.stat:
@@ -28,7 +28,7 @@
       register: wireguard_register_private_key
       changed_when: false
       no_log: "{{ ansible_verbosity < 3 }}"
-    
+
     - name: Set private key fact
       ansible.builtin.set_fact:
         wireguard_private_key: "{{ wireguard_register_private_key.stdout }}"
@@ -68,7 +68,7 @@
     dest: "{{ wireguard_conf_dir }}/{{ wireguard_interface }}.conf"
     owner: root
     group: root
-    mode: 0700
+    mode: "0o700"
   notify:
     - Restart wg-quick
 
